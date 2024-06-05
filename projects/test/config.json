@@ -1,0 +1,29 @@
+{
+    "meta": {
+        "data-version": 1,
+        "name": "Test Project",
+        "description": "Test of circuit simulation"
+    },
+    "settings": {
+        "true_subsize": true
+    },
+    "root-component": {
+        "id": "not"
+    },
+    "required-packages": {
+        "_builtins": [
+            "nmos_fet",
+            "pmos_fet",
+            "vcc",
+            "gnd",
+            "spst_sw",
+            "led"
+        ]
+    },
+    "components": {
+        "not": {
+            "name": "NOT Gate",
+            "path": "not.json"
+        }
+    }
+}

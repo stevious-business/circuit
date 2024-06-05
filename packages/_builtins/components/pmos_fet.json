@@ -1,0 +1,26 @@
+{
+    "component-meta": {
+        "data-version": 1,
+        "width": 10,
+        "height": 10,
+        "background-color": "#444444",
+        "box-label": "PMOS"
+    },
+    "pins": {
+        "0": {
+            "x": 10,
+            "y": 0,
+            "label": "Drain"
+        },
+        "1": {
+            "x": 0,
+            "y": 5,
+            "label": "Gate"
+        },
+        "2": {
+            "x": 10,
+            "y": 10,
+            "label": "Source"
+        }
+    }
+}

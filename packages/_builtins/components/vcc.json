@@ -1,0 +1,16 @@
+{
+    "component-meta": {
+        "data-version": 1,
+        "width": 10,
+        "height": 10,
+        "background-color": "#444444",
+        "box-label": "VCC"
+    },
+    "pins": {
+        "0": {
+            "x": 5,
+            "y": 10,
+            "label": "Vcc"
+        }
+    }
+}
