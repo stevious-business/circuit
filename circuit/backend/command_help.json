@@ -1,0 +1,183 @@
+{
+    "manual": {
+        "help": {
+            "description": "Provides help for console commands",
+            "format": "help [command]"
+        },
+        "exit": {
+            "description": "Exits the application",
+            "format": "exit"
+        },
+        "project": {
+            "description": "Manages projects",
+            "format": "project [new|open|meta|setting|save|setroot]",
+            "subcommands": {
+                "new": {
+                    "description": "Create a new project",
+                    "format": "project new <name>"
+                },
+                "open": {
+                    "description": "Opens a project",
+                    "format": "project open <path>"
+                },
+                "meta": {
+                    "description": "Interact with project metadata",
+                    "format": "project meta [get|set] <attribute> [value]",
+                    "subcommands": {
+                        "get": {
+                            "description": "Get project metadata",
+                            "format": "project meta get <attribute>"
+                        },
+                        "set": {
+                            "description": "Set project metadata",
+                            "format": "project meta set <attribute> value"
+                        }
+                    }
+                },
+                "setting": {
+                    "description": "Interact with project settings",
+                    "format": "project setting [get|set] <setting> [value]",
+                    "subcommands": {
+                        "get": {
+                            "description": "Get project setting",
+                            "format": "project setting get <setting>"
+                        },
+                        "set": {
+                            "description": "Set project setting",
+                            "format": "project setting set <setting> value"
+                        }
+                    }
+                },
+                "save": {
+                    "description": "Saves a project file",
+                    "format": "project save <path>"
+                },
+                "info": {
+                    "description": "Lists info about the project and state",
+                    "format": "project save info"
+                },
+                "setroot": {
+                    "description": "Set root component of project",
+                    "format": "project setroot <cid>"
+                },
+                "include": {
+                    "description": "Include chips from a package",
+                    "format": "project include <package> <chip>*"
+                }
+            }
+        },
+        "component": {
+            "description": "Interact with active component",
+            "format": "component [add|list|delete|meta|select|save]",
+            "subcommands": {
+                "add": {
+                    "description": "Create a new component",
+                    "format": "component add <name>"
+                },
+                "open": {},
+                "list": {},
+                "delete": {},
+                "meta": {},
+                "select": {},
+                "save": {}
+            }
+        },
+        "saveall": {
+            "description": "Saves active project and all its components",
+            "format": "saveall"
+        },
+        "simulation": {
+            "description": "Manipulate the simulation",
+            "format": "simulation [validate|init|framerate|resume|pause|autostart]",
+            "subcommands": {
+                "validate": {},
+                "init": {},
+                "framerate": {},
+                "resume": {},
+                "pause": {},
+                "autostart": {
+                    "description": "Automatically perform validation, initialisation, and launch",
+                    "format": "siumlation autostart <framerate>"
+                }
+            }
+        },
+        "pin": {
+            "description": "Modify pins in current component",
+            "format": "pin [new|io|list|move|label]",
+            "subcommands": {
+                "place": {},
+                "io": {
+                    "format": "pin io [set|unset] <pinid>",
+                    "subcommands": {
+                        "set": {},
+                        "unset": {}
+                    }
+                },
+                "list": {},
+                "move": {},
+                "label": {}
+            }
+        },
+        "chip": {
+            "description": "Modify chips in current component",
+            "format": "chip [place|list|move]",
+            "subcommands": {
+                "place": {},
+                "list": {},
+                "move": {}
+            }
+        },
+        "wire": {
+            "description": "Modify wires in current component",
+            "format": "wire",
+            "subcommands": {
+                "new": {}
+            }
+        },
+        "selection": {
+            "description": "Batch modify objects in component",
+            "format": "selection [select|deselect|copy|paste|delete|move]",
+            "subcommands": {
+                "select": {
+                    "description": "Expand the selection",
+                    "format": "selection select [chip|wire|all]"
+                },
+                "deselect": {},
+                "copy": {
+                    "description": "Copy the selection to clipboard",
+                    "format": "selection copy"
+                },
+                "paste": {
+                    "description": "Pastes a group of objects",
+                    "format": "selection paste [selected]? <x> <y>",
+                    "subcommands": {
+                        "selected": {
+                            "description": "Paste current selection instead of clipboard",
+                            "format": "selection paste selected <x> <y>"
+                        }
+                    }
+                },
+                "delete": {
+                    "description": "Removes the current selection",
+                    "format": "selection delete"
+                },
+                "move": {
+                    "description": "Moves the current selection",
+                    "format": "selection move <x> <y>"
+                }
+            }
+        },
+        "undo": {
+            "description": "Undoes the previous operation",
+            "format": "undo <count>?"
+        },
+        "redo": {
+            "description": "Redoes the previous undo operation",
+            "format": "redo <count>?"
+        },
+        "execute": {
+            "description": "Runs a script file containing console commands",
+            "format": "execute <path>"
+        }
+    }
+}

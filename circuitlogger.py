@@ -4,13 +4,12 @@ from functools import wraps
 
 from locals import *
 
-launch = perf_counter()
+_launch_time = perf_counter()
 
-log_indent_count = 0
-log_spacing = 4
-log_file = None
+_log_indents = 0
+_log_file = None
 
-
+"""
 class Timer:
     def __init__(self):
         self._timer = perf_counter()
@@ -26,37 +25,41 @@ def sfmt(str_: str, len_: int, ws=False):
     strlen = len(str_)
     remain = len_ - strlen
     return str_ + remain * (" " if ws else ".")
+"""
 
-
-def ts() -> str:
-    global launch
-    odd_len_text = f"{round(perf_counter()-launch, 4)}"
-    return odd_len_text.zfill(10)
+def _ts() -> str:
+    global _launch_time
+    time_float = perf_counter()-_launch_time
+    time_secs = int(time_float)
+    time_offset = round(time_float - time_secs, 4)
+    return f"{str(time_secs).zfill(5)}.\
+{str(time_offset).ljust(6, '0').removeprefix('0.')}"
 
 
 def log_indent():
-    global log_indent_count
-    log_indent_count += log_spacing
+    global _log_indents
+    _log_indents += LOG_SPACING
 
 
 def log_dedent():
-    global log_indent_count
-    log_indent_count -= log_spacing
+    global _log_indents
+    _log_indents -= LOG_SPACING
 
 
 def setup_logger():
-    global log_file
-    log_file = open("program.log", "w", encoding="utf-8")
+    global _log_file
+    _log_file = open("program.log", "w", encoding="utf-8")
 
 
 def exit_logger():
-    global log_file
-    log_file.flush()
-    log_file.close()
+    global _log_file
+    _log_file.flush()
+    _log_file.close()
 
 
 def log(level, text, nts=False, use_indent=True, **kwargs):
-    global log_file
+    # TODO: clean up this function ffs
+    global _log_file
     if level >= DBG.get():
         level_colors = {
             LOG_BASE: "\033[90m",
@@ -77,9 +80,9 @@ def log(level, text, nts=False, use_indent=True, **kwargs):
         if nts:     # No time stamp (no prefix)
             print(f"{level_colors[level]}{text}\033[0m", **kwargs)
             return
-        t = ts()
-        print_indent_count = log_indent_count*use_indent
-        pre = f"\033[0m[\033[36m{SW_NAME}\033[0m::" \
+        t = _ts()
+        print_indent_count = _log_indents*use_indent
+        pre = f"\r\033[0m[\033[36m{SW_NAME}\033[0m::" \
             + f"\033[32m{t}\033[0m::" \
             + f"{level_colors[level]+level_texts[level]}\033[0m]"
         final_text = f"{pre} {' '*print_indent_count} \
@@ -90,8 +93,8 @@ def log(level, text, nts=False, use_indent=True, **kwargs):
             final_text = "\r" + final_text
         print(final_text, **kwargs)
         if DBG.cr_on_log:
-            print("> ", end="")
-        log_file.write(uncolored_text+"\n")
+            print(TERMINAL_PROMPT, end="")
+        _log_file.write(uncolored_text+"\n")
 
 
 def logAutoIndent(function):
@@ -110,4 +113,4 @@ def logAutoIndent(function):
     return inner
 
 
-timer = Timer()
+#timer = Timer()

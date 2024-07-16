@@ -1,0 +1,35 @@
+project new notgate_test
+project meta set description Test of scripting + framework
+project include _builtins vcc gnd pmos_fet nmos_fet
+component add not
+component select not
+project setroot not
+
+chip place _builtins.vcc 15 0
+chip place _builtins.pmos_fet 10 20
+chip place _builtins.nmos_fet 10 40
+chip place _builtins.gnd 15 60
+
+pin place 0 35
+pin label 0 X
+pin place 8 35
+pin place 8 25
+pin place 8 45
+pin place 20 35
+pin place 35 35
+pin label 5 !X
+pin io set 0
+pin io set 5
+
+wire new p0 p1
+wire connect p1 p2
+wire connect p1 p3
+wire connect p2 c1.1
+wire connect p3 c2.1
+wire new p4 p5
+wire connect p4 c1.2
+wire connect p4 c2.0
+wire new c0.0 c1.0
+wire new c2.2 c3.0
+
+saveall projects/not_build_test

@@ -1,49 +1,44 @@
-from enum import Enum, auto
+from json import loads, JSONDecodeError
+
+from circuitlogger import log
+from locals import *
 
 
-class State(Enum):
-    OFF = auto()
-    ON = auto()
-    Z = auto()
+class BaseComponent:
+
+    _component_name = "Basic Component"
+    _component_file_path = "dummy.json"
+
+    def __init__(self):
+        self._load_from_component_file(self._component_file_path)
+
+    def _load_from_component_file(self, path):
+        # TODO: Proper asset handling / data version checking etc.
+        # AKA Resource manager in general
+        try:
+            with open(path) as f:
+                component_data = loads(f.read())
+        except FileNotFoundError:
+            log(LOG_FAIL, f"Failed to initialize component '{self._component_name}': File {path} not found!")
+        except JSONDecodeError:
+            log(LOG_FAIL, f"Failed to initialize component '{self._component_name}': Malformed JSON in {path}!")
 
 
-class Pin:
-    def __init__(self, x=0, y=0, state=State.Z):
-        self._x = x
-        self._y = y
+class Package:
+    # TODO: Move params to configuration file
+    def __init__(self, id: str, name: str, included_components: dict[str: type],
+                 publisher="lcst", base_path="packages"):
+        self.id = id
+        self.name = name
+        # global id -> component class
+        self.included_components = {}
+        # Mangle component names
+        for c_name in included_components:
+            mangled_name = ".".join([publisher, id, c_name])
+            self.included_components[mangled_name] = included_components[c_name]
+        self.base_path = base_path
+        self.components_path = base_path + "/components"
+        self.component_scripts_path = base_path + "/component_scripts"
 
-
-class PluginComponent:
-    """maybe function that runs every tick? but effish"""
-    """or just on updates but that fucks clocks"""
-    pass
-
-
-class Component:
-    def __init__(self, n_inputs, n_outputs):
-        self._id = id()
-        self._n_inputs = n_inputs
-        self._n_outputs = n_outputs
-        self._inputs = [Pin() for k in range(n_inputs)]
-        self._outputs = [Pin() for k in range(n_outputs)]
-        self._subcomponents: dict[int: Component] = {}
-        # {(component_id, input_id, value): time}
-        self._schedule_: dict[tuple(int, int, int): int] = {}
-
-    def _schedule(self, component_id, input_id, value, time):
-        self._schedule_[(component_id, input_id, value)] = time
-
-    def _set_input(self, iid, value):
-        assert self._n_inputs > iid, f"Input ID {iid} is too large"
-        self._inputs[iid] = value
-
-    def _tick(self):
-        for key in self._schedule_:
-            if self._schedule_[key] == 0:
-                cid, iid, value = key
-                c: Component = self._subcomponents.get(cid)
-                assert c, f"Found no subcomponent with id {cid}"
-                c._set_input(iid, value)
-            self._schedule_[key] -= 1
-            # After trigger (t=0), time becomes negative
-            # This enables potential tracking / last activation time
+    def get_components(self):
+        return self.included_components

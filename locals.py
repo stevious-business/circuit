@@ -5,6 +5,7 @@ LOG_INFO = 3    # user-level output
 LOG_WARN = 4    # important mishaps
 LOG_FAIL = 5    # absolute failure
 LOG_SILENT_MODE = 6     # For setting floor
+LOG_SPACING = 4
 
 SW_NAME = "LCST"
 SW_NAME_LONG = "Large Circuit Simulation Tool"
@@ -25,6 +26,8 @@ Options for MODE:
 {SW_SIGN_STRING}
 """
 
+TERMINAL_PROMPT = f"\033[36m{SW_NAME}\033[0m >>> "
+
 
 class DebugOptions:
     FLOOR = 0
@@ -37,8 +40,8 @@ class DBGLVL:
         self.silent = False
         self.cr_on_log = False
     
-    def set_cr_on_log(self):
-        self.cr_on_log = True
+    def set_cr_on_log(self, state=True):
+        self.cr_on_log = state
 
     def set(self, lvl):
         if lvl >= self.floor:
