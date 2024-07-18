@@ -40,10 +40,10 @@
             "label": "!X"
         }
     },
-    "io-pins": [
-        "0",
-        "5"
-    ],
+    "io-pins": {
+        "0": "0",
+        "1": "5"
+    },
     "subcomponents": {
         "0": {
             "type": "_builtins.vcc",

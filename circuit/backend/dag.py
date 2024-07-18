@@ -1,4 +1,5 @@
 class DAG:
+    """Directed Acyclic Graph utility"""
     def __init__(self):
         self.adjacencies: dict[str: list] = {}
         self.marked = {}

@@ -1,4 +1,4 @@
-from circuit.base_classes import BaseComponent
+from circuit.base_classes import PluginComponent
 
 
-class PMOS_FET(BaseComponent): pass
+class PMOS_FET(PluginComponent): pass

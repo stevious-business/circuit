@@ -1,6 +1,6 @@
 from importlib import import_module
 
-from circuit.base_classes import Package, BaseComponent
+from circuit.base_classes import Package, PluginComponent
 from circuitlogger import *
 
 
@@ -34,8 +34,8 @@ def validate_package(pack) -> int:
         for component_name in pack.PACKAGE.get_components():
             log(LOG_VERB, f"Loading component {component_name}...")
             component_class = pack.PACKAGE.included_components[component_name]
-            if not issubclass(component_class, BaseComponent):
-                log(LOG_WARN, f"Component does not inherit from BaseComponent: {component_class}")
+            if not issubclass(component_class, PluginComponent):
+                log(LOG_WARN, f"Component does not inherit from PluginComponent: {component_class}")
                 ERR_CODE |= F_COMPTYPE
             log(LOG_VERB, "Done!")
     except:

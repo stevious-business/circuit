@@ -1,4 +1,4 @@
-from circuit.base_classes import BaseComponent
+from circuit.base_classes import PluginComponent
 
 
-class GND(BaseComponent): pass
+class GND(PluginComponent): pass

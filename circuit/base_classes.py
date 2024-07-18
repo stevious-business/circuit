@@ -4,7 +4,116 @@ from circuitlogger import log
 from locals import *
 
 
-class BaseComponent:
+class Pin:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.has_label = False
+        self.label_ = ""
+        self.linked_to_wire = False
+        self.wire = -1
+
+    def move(self, x, y):
+        self.x = x
+        self.y = y
+
+    def label(self, l):
+        self.has_label = True
+        self.label_ = l
+
+    def link_to_wire(self, widx):
+        self.linked_to_wire = True
+        self.wire = widx
+
+    @staticmethod
+    def from_json(json: dict):
+        x = json["x"]
+        y = json["y"]
+        label = json.get("label", None)
+        has_label = label is not None
+        wire = json.get("wire", None)
+        has_wire = wire is not None
+        p = Pin(x, y)
+        p.has_label = has_label
+        if has_label:
+            p.label(label)
+        if has_wire:
+            p.link_to_wire(wire)
+        return p
+
+
+class Component:
+    def __init__(self, project):
+        # IMPORTANT NOTE ABOUT PROJECT: Components may be used throughout multiple projects.
+        # The project attribute is specific to an instance of an open project.
+        self.project = project
+        self.pins = {}
+        self.io_pins = {}
+        self.chips = {}
+        self.wires = {}
+        self.metadata = {}
+        self.new_pin_idx = lambda: self._new_idx(self.pins)
+        self.new_iopin_idx = lambda: self._new_idx(self.io_pins)
+        self.new_chip_idx = lambda: self._new_idx(self.chips)
+        self.new_wire_idx = lambda: self._new_idx(self.wires)
+
+    def _new_idx(self, dict_: dict) -> str:
+        # Runs in o(n) (i think)
+        used_keys = set(dict_.keys())
+        idx = 0
+        while True:
+            if str(idx) in used_keys:
+                idx += 1
+            else:
+                return str(idx)
+
+    def new_pin(self, x: int, y: int):
+        self.pins[self.new_pin_idx()] = Pin(x, y)
+
+    def mark_pin_as_io(self, idx: str):
+        assert self.pins.get(idx, None)
+        self.io_pins[self.new_iopin_idx()] = idx
+
+    def add_chip(self)
+
+    def get_pin(self, idx: str):
+        return self.pins[idx]
+
+    def get_chip(self, idx: str):
+        return self.chips[idx]
+
+    def get_wire(self, idx: str):
+        return self.wires[idx]
+
+    @staticmethod
+    def from_json(json: dict):
+        # TODO: Error messages for asserts
+        assert "component-data" in json
+        assert "pins" in json
+        assert "io-pins" in json
+        assert "subcomponents" in json
+        assert "wires" in json
+        c = Component()
+        c.metadata = json["component_meta"]
+        c.io_pins = json["io-pins"]
+        for k in json["pins"]:
+            c.pins[k] = Pin.from_json(json["pins"][k])
+
+    @staticmethod
+    def from_file(path):
+        try:
+            with open(path) as f:
+                jsondata = loads(f.read())
+            return Component.from_json(jsondata)
+        except FileNotFoundError:
+            log(LOG_FAIL, f"Component from {path} could not be loaded")
+        except JSONDecodeError:
+            log(LOG_FAIL, f"Component from {path} has invalid json")
+        return Component()
+
+
+class PluginComponent(Component):
+    """Component class for package plugin components"""
 
     _component_name = "Basic Component"
     _component_file_path = "dummy.json"

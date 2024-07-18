@@ -10,7 +10,7 @@
         },
         "project": {
             "description": "Manages projects",
-            "format": "project [new|open|meta|setting|save|setroot]",
+            "format": "project [new|open|meta|setting|save|setroot|include]",
             "subcommands": {
                 "new": {
                     "description": "Create a new project",
@@ -103,7 +103,7 @@
         },
         "pin": {
             "description": "Modify pins in current component",
-            "format": "pin [new|io|list|move|label]",
+            "format": "pin [place|io|list|move|label]",
             "subcommands": {
                 "place": {},
                 "io": {

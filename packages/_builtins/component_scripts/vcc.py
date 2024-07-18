@@ -1,4 +1,4 @@
-from circuit.base_classes import BaseComponent
+from circuit.base_classes import PluginComponent
 
 
-class VCC(BaseComponent): pass
+class VCC(PluginComponent): pass

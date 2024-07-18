@@ -1,18 +1,27 @@
 from os.path import join
 from json import loads, JSONDecodeError
 
+from .dag import DAG
 from circuitlogger import *
 
 
 class Project:
-    def __init__(self):
+    def __init__(self, name):
         self.config = {}
-        self.name = ""
-        self.is_loaded = False
+        self.name = name
+        self.metadata = {}
+        self.is_loaded = True
+        self.ddag = DAG()
+        self.included_components = {}
+        self.root_component = None
+        self.selected_component = None
 
     def load_from_config(self, data):
         self.config = data
         return self
+
+    def save(self, path):
+        return
 
     @staticmethod
     def load(path):
