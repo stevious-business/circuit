@@ -74,7 +74,8 @@ class Component:
         assert self.pins.get(idx, None)
         self.io_pins[self.new_iopin_idx()] = idx
 
-    def add_chip(self)
+    def add_chip(self):
+        return
 
     def get_pin(self, idx: str):
         return self.pins[idx]
