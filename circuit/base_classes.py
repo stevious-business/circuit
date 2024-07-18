@@ -1,5 +1,7 @@
 from json import loads, JSONDecodeError
+from os.path import basename
 
+from backend.dag import DAG
 from circuitlogger import log
 from locals import *
 
@@ -42,11 +44,32 @@ class Pin:
         return p
 
 
+class Chip:
+    def __init__(self, component, x, y):
+        self.x = x
+        self.y = y
+        self.component = component
+
+    def move(self, x, y):
+        self.x = x
+        self.y = y
+
+    @staticmethod
+    def from_json(json):
+        # TODO: Find a good way to handle component types
+        c = Chip()
+        c.move(json["x"], json["y"])
+
+
 class Component:
-    def __init__(self, project):
+    def __init__(self, project, id_):
         # IMPORTANT NOTE ABOUT PROJECT: Components may be used throughout multiple projects.
         # The project attribute is specific to an instance of an open project.
+        # A component instance exists for every chip, but does not contain chip information
+        self.id_ = id_
         self.project = project
+        self.projectDDAG: DAG = self.project.ddag
+        self.projectDDAG.add_node(id_, True)
         self.pins = {}
         self.io_pins = {}
         self.chips = {}
@@ -74,8 +97,9 @@ class Component:
         assert self.pins.get(idx, None)
         self.io_pins[self.new_iopin_idx()] = idx
 
-    def add_chip(self):
-        return
+    def add_chip(self, component, x, y):
+        self.chips[self.new_chip_idx()] = Chip(component, x, y)
+        self.projectDDAG.connect(self.id_, component.id_)
 
     def get_pin(self, idx: str):
         return self.pins[idx]
@@ -86,31 +110,37 @@ class Component:
     def get_wire(self, idx: str):
         return self.wires[idx]
 
+    def setid(self, id_):
+        self.id_ = id_
+
     @staticmethod
-    def from_json(json: dict):
+    def from_json(project, id_, json: dict):
         # TODO: Error messages for asserts
         assert "component-data" in json
         assert "pins" in json
         assert "io-pins" in json
         assert "subcomponents" in json
         assert "wires" in json
-        c = Component()
+        c = Component(project, id_)
         c.metadata = json["component_meta"]
         c.io_pins = json["io-pins"]
         for k in json["pins"]:
             c.pins[k] = Pin.from_json(json["pins"][k])
+        return c
 
     @staticmethod
-    def from_file(path):
+    def from_file(project, path):
         try:
+            id_from_path = ".".join(basename(path).split(".")[:-1])
             with open(path) as f:
                 jsondata = loads(f.read())
-            return Component.from_json(jsondata)
+            return Component.from_json(project, id_from_path, jsondata)
         except FileNotFoundError:
             log(LOG_FAIL, f"Component from {path} could not be loaded")
+            raise
         except JSONDecodeError:
             log(LOG_FAIL, f"Component from {path} has invalid json")
-        return Component()
+            raise
 
 
 class PluginComponent(Component):
