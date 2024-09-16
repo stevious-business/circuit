@@ -1,5 +1,7 @@
 from locals import *
 from circuitlogger import *
+from thread_communicator import ThreadCommunicator, Directive, DirectiveType
+from .project import Project
 
 from json import loads, JSONDecodeError
 
@@ -17,7 +19,8 @@ class InvalidCommandException(SyntaxError): pass
 
 class CCP:
     # Console command processor, not chinese communist party
-    def __init__(self):
+    def __init__(self, tc: ThreadCommunicator):
+        self.threadCommunicator = tc
         self.history = []
         self.should_close = False
         self.previous_result = None
@@ -55,6 +58,7 @@ class CCP:
                 self.print_valid_commands()
 
     def exit(self, *args):
+        self.threadCommunicator.add_directive(None, Directive(DirectiveType.QUIT))
         DBG.set_cr_on_log(False)
         self.should_close = True
 
@@ -84,6 +88,10 @@ class CCP:
 
     def project_new(self, name, *args):
         return
+
+    def project_open(self, path, *args):
+        openProject = Project.load(path, self.threadCommunicator.package_datas)
+        self.threadCommunicator.openProject = openProject
 
     def project_meta(self, *args):
         self.help("project", "meta")
@@ -157,7 +165,7 @@ class CCP:
                 del args[0]
             else:
                 break
-        if hasattr(self, operation):
+        if hasattr(self, operation) and not operation.startswith("__"):
             try:
                 self.previous_result = getattr(self, operation)(*args) or self.previous_result
             except InvalidCommandException:
@@ -165,7 +173,7 @@ class CCP:
                 if help_on_fail:
                     self.print_valid_commands()
             except Exception as e:
-                log(LOG_FAIL, f"There was an error executing the command.")
+                log(LOG_FAIL, f"There was an error ({e}) executing the command.")
                 if help_on_fail:
                     self.print_valid_commands()
         else:
@@ -178,7 +186,7 @@ class CCP:
             command = input("\r"+TERMINAL_PROMPT)
             self.process_command(command)
 
-def launch_terminal(comm):
+def launch_terminal(tc):
     DBG.set_cr_on_log()
-    ccp = CCP()
+    ccp = CCP(tc)
     ccp.mainloop()

@@ -1,7 +1,7 @@
 from json import loads, JSONDecodeError
 from os.path import basename
 
-from backend.dag import DAG
+from .backend.dag import DAG
 from circuitlogger import log
 from locals import *
 
@@ -63,6 +63,7 @@ class Chip:
 
 class Component:
     def __init__(self, project, id_):
+        # TODO: Find some good way to obtain this from id
         # IMPORTANT NOTE ABOUT PROJECT: Components may be used throughout multiple projects.
         # The project attribute is specific to an instance of an open project.
         # A component instance exists for every chip, but does not contain chip information
@@ -99,6 +100,7 @@ class Component:
 
     def add_chip(self, component, x, y):
         self.chips[self.new_chip_idx()] = Chip(component, x, y)
+        # Add dependency
         self.projectDDAG.connect(self.id_, component.id_)
 
     def get_pin(self, idx: str):
@@ -145,6 +147,7 @@ class Component:
 
 class PluginComponent(Component):
     """Component class for package plugin components"""
+    # TODO: Think about global update candidates here
 
     _component_name = "Basic Component"
     _component_file_path = "dummy.json"
@@ -170,6 +173,7 @@ class Package:
                  publisher="lcst", base_path="packages"):
         self.id = id
         self.name = name
+        self.publisher = publisher
         # global id -> component class
         self.included_components = {}
         # Mangle component names
@@ -180,5 +184,15 @@ class Package:
         self.components_path = base_path + "/components"
         self.component_scripts_path = base_path + "/component_scripts"
 
+    def mangled_name(self, c_name):
+        return ".".join([self.publisher, self.id, c_name])
+
     def get_components(self):
         return self.included_components
+
+    def __getitem__(self, item):
+        if item in self.included_components.keys():
+            return self.included_components[item]
+        elif self.mangled_name(item) in self.included_components.keys():
+            return self.included_components[self.mangled_name(item)]
+        raise KeyError(item)

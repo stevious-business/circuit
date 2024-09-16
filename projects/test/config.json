@@ -15,9 +15,7 @@
             "nmos_fet",
             "pmos_fet",
             "vcc",
-            "gnd",
-            "spst_sw",
-            "led"
+            "gnd"
         ]
     },
     "components": {
