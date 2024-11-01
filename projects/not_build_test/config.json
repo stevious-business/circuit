@@ -1,0 +1,22 @@
+{
+    "meta": {
+        "data-version": 1,
+        "name": "notgate_test",
+        "description": "Test of scripting + framework"
+    },
+    "settings": {
+        "true_subsize": false
+    },
+    "root-component": {
+        "id": null
+    },
+    "required-packages": {
+        "packages._builtins": [
+            "vcc",
+            "gnd",
+            "pmos_fet",
+            "nmos_fet"
+        ]
+    },
+    "components": {}
+}

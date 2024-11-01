@@ -190,6 +190,14 @@ class Package:
     def get_components(self):
         return self.included_components
 
+    def get_ambiguous_component_names(self):
+        cnames = []
+        universal_prefix = self.publisher+"."+self.id+"."
+        for mangled_name in self.included_components.keys():
+            ambiguous_name = mangled_name.removeprefix(universal_prefix)
+            cnames.append(ambiguous_name)
+        return cnames
+
     def __getitem__(self, item):
         if item in self.included_components.keys():
             return self.included_components[item]

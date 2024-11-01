@@ -2,6 +2,7 @@ from enum import Enum, auto
 import threading
 
 from circuitlogger import *
+from circuit.backend.project import Project
 
 
 class Executable:
@@ -93,6 +94,6 @@ class ThreadCommunicator:  # contains thread information
 class ServerData(ThreadCommunicator):
     def __init__(self, package_datas):
         super().__init__()
-        self.package_datas = []
-        self.openProject = None
+        self.package_datas = package_datas
+        self.openProject: Project = None
         self.init()

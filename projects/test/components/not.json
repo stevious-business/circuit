@@ -46,22 +46,22 @@
     },
     "subcomponents": {
         "0": {
-            "type": "_builtins.vcc",
+            "type": "packages._builtins.vcc",
             "x": 15,
             "y": 0
         },
         "1": {
-            "type": "_builtins.pmos_fet",
+            "type": "packages._builtins.pmos_fet",
             "x": 10,
             "y": 20
         },
         "2": {
-            "type": "_builtins.nmos_fet",
+            "type": "packages._builtins.nmos_fet",
             "x": 10,
             "y": 40
         },
         "3": {
-            "type": "_builtins.gnd",
+            "type": "packages._builtins.gnd",
             "x": 15,
             "y": 60
         }

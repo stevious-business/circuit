@@ -1,7 +1,8 @@
 from locals import *
 from circuitlogger import *
-from thread_communicator import ThreadCommunicator, Directive, DirectiveType
+from thread_communicator import ServerData, Directive, DirectiveType
 from .project import Project
+from circuit.base_classes import Package
 
 from json import loads, JSONDecodeError
 
@@ -19,7 +20,7 @@ class InvalidCommandException(SyntaxError): pass
 
 class CCP:
     # Console command processor, not chinese communist party
-    def __init__(self, tc: ThreadCommunicator):
+    def __init__(self, tc: ServerData):
         self.threadCommunicator = tc
         self.history = []
         self.should_close = False
@@ -81,13 +82,15 @@ class CCP:
             DBG.set_cr_on_log()
 
     def saveall(self, path, *args):
+        self.threadCommunicator.openProject.save(path)
         log(LOG_VERB, f"Saving all to {path}...")
 
     def project(self, *args):
         self.help("project")
 
     def project_new(self, name, *args):
-        return
+        openProject = Project(name)
+        self.threadCommunicator.openProject = openProject
 
     def project_open(self, path, *args):
         openProject = Project.load(path, self.threadCommunicator.package_datas)
@@ -97,10 +100,25 @@ class CCP:
         self.help("project", "meta")
 
     def project_meta_set(self, attr, *value):
+        self.threadCommunicator.openProject.set_meta(attr, *value)
         return
 
     def project_include(self, pack, *chips):
-        return
+        if (packdata := self.threadCommunicator.package_datas.get(pack, None)) is None:
+            raise InvalidCommandException(f"Package {pack} could not be located!")
+        package: Package = packdata.PACKAGE
+        proj_includes = self.threadCommunicator.openProject.config["required-packages"]
+        already_included_chips = proj_includes.get(pack, [])
+        for chip in chips:
+            if chip in already_included_chips:
+                continue
+            if chip not in package.get_ambiguous_component_names():
+                raise InvalidCommandException(f"Chip {chip} does not exist within {pack}")
+            mangled_cname = package.mangled_name(chip)
+            chip_class = package[mangled_cname]
+            self.threadCommunicator.openProject.included_components[mangled_cname] = chip_class
+            already_included_chips.append(chip)
+        self.threadCommunicator.openProject.config["required-packages"][pack] = already_included_chips
 
     def project_setroot(self, cname, *args):
         return
@@ -168,14 +186,16 @@ class CCP:
         if hasattr(self, operation) and not operation.startswith("__"):
             try:
                 self.previous_result = getattr(self, operation)(*args) or self.previous_result
-            except InvalidCommandException:
+            except InvalidCommandException as e:
                 log(LOG_FAIL, f"The command format provided is not valid.")
+                log(LOG_FAIL, f"Message: {e}")
                 if help_on_fail:
                     self.print_valid_commands()
             except Exception as e:
-                log(LOG_FAIL, f"There was an error ({e}) executing the command.")
+                log(LOG_FAIL, f"There was an error ({repr(e)}) executing the command.")
                 if help_on_fail:
                     self.print_valid_commands()
+                raise e
         else:
             log(LOG_FAIL, f"Invalid command '{operation}'!")
             if help_on_fail:
