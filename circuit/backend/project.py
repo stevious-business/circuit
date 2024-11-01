@@ -1,4 +1,4 @@
-from os.path import join, basename, exists
+from os.path import join, basename, exists, dirname
 from os import makedirs, mkdir
 from json import loads, dumps, JSONDecodeError
 import re
@@ -7,6 +7,7 @@ from .dag import DAG
 from circuitlogger import *
 from configuration import INCLUDED_PACKAGES
 from circuit.base_classes import Component, PluginComponent
+from circuit.package_manager import trygetpackage
 
 
 class ProjectLoaderError(RuntimeError): pass
@@ -165,12 +166,15 @@ class Project:
     def getComponentWrapper(self, id_) -> ComponentWrapper:
         return self.config["components"][id_]
 
-    def getComponent(self, id_) -> Component | PluginComponent:
+    def getComponent(self, id_, packdatas) -> Component | PluginComponent:
         if self.componentExists(id_):
             return self.getComponentWrapper(id_).component
         if self.pluginComponentExists(id_):
             pcClass = self.included_components[id_]
-            component: PluginComponent = pcClass()
+            containerPackage = trygetpackage(id_, packdatas)
+            packpath = dirname(containerPackage.__file__)
+            component: PluginComponent = pcClass(self, id_, packpath)
+            return component
         raise KeyError(f"Component {id_} does not exist!")
 
     def componentExists(self, id_) -> bool:

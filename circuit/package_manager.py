@@ -43,3 +43,15 @@ def validate_package(pack) -> int:
         ERR_CODE |= F_INVALID
     finally:
         return ERR_CODE
+
+def trygetpackage(pluginComponentId: str, package_datas: dict):
+    # initially try to guess which package the component will be in
+    package_basename = ".".join(pluginComponentId.split(".")[:-1])
+    if package_basename in package_datas.keys():
+        return package_datas[package_basename]
+    # otherwise search through all available packages
+    for package in package_datas.keys():
+        pack: Package = package_datas[package].PACKAGE
+        if pack.has_component(pluginComponentId):
+            return package # return actual module object
+    raise KeyError(f"Could not locate plugin component {pluginComponentId}")

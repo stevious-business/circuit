@@ -134,8 +134,12 @@ class CCP:
 
     def chip_place(self, cname, x, y, *args):
         scn = self.threadCommunicator.selectedComponent
-        sc: Component = self.threadCommunicator.openProject.getComponent(scn)
-        c: Component = self.threadCommunicator.openProject.getComponent(cname)
+        sc: Component = self.threadCommunicator.openProject.getComponent(
+            scn, self.threadCommunicator.package_datas
+        )
+        c: Component = self.threadCommunicator.openProject.getComponent(
+            cname, self.threadCommunicator.package_datas
+        )
         sc.add_chip(c, x, y)
 
     def pin_place(self, x, y, *args):

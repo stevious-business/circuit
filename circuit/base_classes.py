@@ -71,6 +71,13 @@ class Chip:
         c = Chip()
         c.move(json["x"], json["y"])
 
+    def serialize(self):
+        return {
+            "type": self.component.id_,
+            "x": self.x,
+            "y": self.y
+        }
+
 
 class Component:
     def __init__(self, project, id_):
@@ -177,7 +184,8 @@ class PluginComponent(Component):
     _component_name = "Basic Component"
     _component_file_path = "dummy.json"
 
-    def __init__(self, package_path):
+    def __init__(self, project, id_, package_path):
+        super().__init__(project, id_)
         self._load_from_component_file(join(
             package_path,
             "components",
@@ -209,6 +217,9 @@ class Package:
         for c_name in included_components:
             mangled_name = ".".join([publisher, id, c_name])
             self.included_components[mangled_name] = included_components[c_name]
+
+    def has_component(self, id_):
+        return id_ in self.included_components.keys()
 
     def uid(self):
         return ".".join([self.publisher, self.id])
