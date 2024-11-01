@@ -96,4 +96,5 @@ class ServerData(ThreadCommunicator):
         super().__init__()
         self.package_datas = package_datas
         self.openProject: Project = None
+        self.selectedComponent: str = None
         self.init()

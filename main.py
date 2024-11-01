@@ -29,7 +29,6 @@ if __name__ == "__main__":
         log(LOG_DEBG, "Finished loading packages!")
         log(LOG_INFO, f"Successfully loaded {loaded_package_count}/{len(package_list)} packages!")
         print(package_datas)
-        # TODO: Startup threads
         tc = ServerData(package_datas)
         tc.newThread("server", launchServer, daemon=False)
         # graphical thread and server thread startup here

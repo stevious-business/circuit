@@ -121,13 +121,16 @@ class CCP:
         self.threadCommunicator.openProject.config["required-packages"][pack] = already_included_chips
 
     def project_setroot(self, cname, *args):
-        return
+        self.threadCommunicator.openProject.set_root_id(cname)
 
     def component_add(self, name, *args):
-        return
+        self.threadCommunicator.openProject.new_component(name, args[0] if args else None)
 
     def component_select(self, name, *args):
-        return
+        if self.threadCommunicator.openProject.componentExists(name):
+            self.threadCommunicator.selectedComponent = name
+        else:
+            raise KeyError(f"Component {name} does not exist!")
 
     def chip_place(self, cname, x, y, *args):
         return

@@ -8,7 +8,7 @@
         "true_subsize": false
     },
     "root-component": {
-        "id": null
+        "id": "not"
     },
     "required-packages": {
         "packages._builtins": [
@@ -18,5 +18,10 @@
             "nmos_fet"
         ]
     },
-    "components": {}
+    "components": {
+        "not": {
+            "name": "not",
+            "path": "not.json"
+        }
+    }
 }

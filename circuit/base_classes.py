@@ -1,9 +1,20 @@
-from json import loads, JSONDecodeError
+from json import loads, JSONDecodeError, dumps
 from os.path import basename
 
 from .backend.dag import DAG
 from circuitlogger import log
 from locals import *
+
+
+def serialize(dict_):
+    json = {}
+    for k in dict_:
+        object_ = dict_[k]
+        if not hasattr(object_, "serialize"):
+            log(LOG_WARN, f"Encountered unserializable object {object_}!")
+        else:
+            json[k] = object_.serialize()
+    return json
 
 
 class Pin:
@@ -99,6 +110,11 @@ class Component:
         self.io_pins[self.new_iopin_idx()] = idx
 
     def add_chip(self, component, x, y):
+        warning = "Cannot place %s in %s recursively"
+        prevent_place = self.projectDDAG.connection_exists(
+            component.id_, self.id_
+        )
+        assert not prevent_place, warning % (self.id_, component.id_)
         self.chips[self.new_chip_idx()] = Chip(component, x, y)
         # Add dependency
         self.projectDDAG.connect(self.id_, component.id_)
@@ -117,14 +133,13 @@ class Component:
 
     @staticmethod
     def from_json(project, id_, json: dict):
-        # TODO: Error messages for asserts
-        assert "component-data" in json
-        assert "pins" in json
-        assert "io-pins" in json
-        assert "subcomponents" in json
-        assert "wires" in json
+        assert "component-meta" in json, "Missing <component-meta> in json!"
+        assert "pins" in json, "Missing <pins> in json!"
+        assert "io-pins" in json, "Missing <io-pins> in json!"
+        assert "subcomponents" in json, "Missing <subcomponents> in json!"
+        assert "wires" in json, "Missing <wires> in json!"
         c = Component(project, id_)
-        c.metadata = json["component_meta"]
+        c.metadata = json["component-meta"]
         c.io_pins = json["io-pins"]
         for k in json["pins"]:
             c.pins[k] = Pin.from_json(json["pins"][k])
@@ -143,6 +158,16 @@ class Component:
         except JSONDecodeError:
             log(LOG_FAIL, f"Component from {path} has invalid json")
             raise
+
+    def save(self, filepath):
+        with open(filepath, "w") as wfile:
+            json = {}
+            json["component-meta"] = self.metadata
+            json["pins"] = serialize(self.pins)
+            json["io-pins"] = self.io_pins
+            json["subcomponents"] = serialize(self.chips)
+            json["wires"] = self.wires
+            wfile.write(dumps(json, indent=4))
 
 
 class PluginComponent(Component):
