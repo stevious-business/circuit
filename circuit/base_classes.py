@@ -19,16 +19,16 @@ def serialize(dict_):
 
 class Pin:
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
+        self.x = int(x)
+        self.y = int(y)
         self.has_label = False
         self.label_ = ""
         self.linked_to_wire = False
         self.wire = -1
 
     def move(self, x, y):
-        self.x = x
-        self.y = y
+        self.x = int(x)
+        self.y = int(y)
 
     def label(self, l):
         self.has_label = True
@@ -36,7 +36,7 @@ class Pin:
 
     def link_to_wire(self, widx):
         self.linked_to_wire = True
-        self.wire = widx
+        self.wire = int(widx)
 
     @staticmethod
     def from_json(json: dict):
@@ -54,16 +54,124 @@ class Pin:
             p.link_to_wire(wire)
         return p
 
+    def serialize(self):
+        d = {}
+        if self.linked_to_wire:
+            d["wire"] = self.wire
+        d |= {
+            "x": self.x,
+            "y": self.y
+        }
+        if self.has_label:
+            d["label"] = self.label_
+        return d
+
+
+class Wire:
+
+    class AlreadyConnectedError(ValueError): pass
+
+    class Connection:
+
+        class Endpoint:
+            # subclasses must override this
+            def serialize(self): pass
+
+        class PinEndpoint(Endpoint):
+            def __init__(self, id_):
+                self.id = int(id_)
+
+            def serialize(self):
+                return {
+                    "type": "pin",
+                    "id": self.id
+                }
+
+        class ChipEndpoint(Endpoint):
+            def __init__(self, cid, iid):
+                self.cid = int(cid)
+                self.iid = int(iid)
+
+            def serialize(self):
+                return {
+                    "type": "chip",
+                    "cid": self.cid,
+                    "iid": self.iid
+                }
+
+        def __init__(self):
+            self.from_: Wire.Connection.Endpoint = None
+            self.to: Wire.Connection.Endpoint = None
+
+        def getpins(self):
+            p = []
+            if isinstance(self.from_, Wire.Connection.PinEndpoint):
+                p.append(self.from_.id)
+            if isinstance(self.to, Wire.Connection.PinEndpoint):
+                p.append(self.to.id)
+            return p
+
+        def set_from(self, e: Endpoint):
+            self.from_ = e
+
+        def set_to(self, e: Endpoint):
+            self.to = e
+
+        @staticmethod
+        def endpointFromString(s: str):
+            if s.startswith("p"):
+                # pin (p<id>)
+                assert s[1:].isdigit()
+                pid = s[1:]
+                e = Wire.Connection.PinEndpoint(pid)
+                return e
+            elif s.startswith("c"):
+                # chip (c<cid>.<iid>)
+                cid, iid, *_ = s[1:].split(".")
+                assert cid.isdigit()
+                assert iid.isdigit()
+                e = Wire.Connection.ChipEndpoint(cid, iid)
+                return e
+            else:
+                raise ValueError(s)
+
+        @staticmethod
+        def new(s1, s2):
+            c = Wire.Connection()
+            c.set_from(Wire.Connection.endpointFromString(s1))
+            c.set_to(Wire.Connection.endpointFromString(s2))
+            return c
+
+        def serialize(self):
+            return {
+                "from": self.from_.serialize(),
+                "to": self.to.serialize()
+            }
+
+    def __init__(self):
+        self.connections: list[Wire.Connection] = []
+
+    def serialize(self):
+        return {
+            "connections": [conn.serialize() for conn in self.connections]
+        }
+
+    def add_connection(self, c: Connection):
+        self.connections.append(c)
+
+    def connect(self, s1, s2):
+        self.add_connection(Wire.Connection.new(s1, s2))
+
 
 class Chip:
     def __init__(self, component, x, y):
-        self.x = x
-        self.y = y
+        self.x = int(x)
+        self.y = int(y)
         self.component = component
 
     def move(self, x, y):
-        self.x = x
-        self.y = y
+        self.x = int(x)
+        self.y = int(y)
 
     @staticmethod
     def from_json(json):
@@ -93,7 +201,13 @@ class Component:
         self.io_pins = {}
         self.chips = {}
         self.wires = {}
-        self.metadata = {}
+        self.metadata = {
+            "data-version": 1,
+            "width": -1,
+            "height": -1,
+            "backgroud-color": "#000000",
+            "box-label": ""
+        }
         self.new_pin_idx = lambda: self._new_idx(self.pins)
         self.new_iopin_idx = lambda: self._new_idx(self.io_pins)
         self.new_chip_idx = lambda: self._new_idx(self.chips)
@@ -112,9 +226,36 @@ class Component:
     def new_pin(self, x: int, y: int):
         self.pins[self.new_pin_idx()] = Pin(x, y)
 
-    def mark_pin_as_io(self, idx: str):
+    def new_wire(self, e1: str, e2: str):
+        w = Wire()
+        idx = self.new_wire_idx()
+        self.wires[idx] = w
+        self.wire_connect(idx, e1, e2)
+
+    def wire_connect(self, idx, e1, e2):
+        assert self.wires.get(idx, None), f"Wire {idx} does not exist"
+        conn = Wire.Connection.new(e1, e2)
+        inv = conn.getpins()
+        while inv:
+            firstPinIdx: Wire.Connection.PinEndpoint = inv[0]
+            pinobj: Pin = self.pins[str(firstPinIdx)]
+            if pinobj.linked_to_wire:
+                if not pinobj.wire == int(idx):
+                    raise Wire.AlreadyConnectedError(firstPinIdx)
+            else:
+                pinobj.link_to_wire(idx)
+            del inv[0]
+        self.wires[idx].add_connection(conn)
+
+    def mark_pin_as_io(self, idx: str, state=True):
         assert self.pins.get(idx, None)
-        self.io_pins[self.new_iopin_idx()] = idx
+        if state:
+            self.io_pins[self.new_iopin_idx()] = int(idx)
+        else:
+            for k in self.io_pins:
+                if str(self.io_pins[k]) == idx:
+                    del self.io_pins[k]
+                    break
 
     def add_chip(self, component, x, y):
         warning = "Cannot place %s in %s recursively"
@@ -126,10 +267,10 @@ class Component:
         # Add dependency
         self.projectDDAG.connect(self.id_, component.id_)
 
-    def get_pin(self, idx: str):
+    def get_pin(self, idx: str) -> Pin:
         return self.pins[idx]
 
-    def get_chip(self, idx: str):
+    def get_chip(self, idx: str) -> Chip:
         return self.chips[idx]
 
     def get_wire(self, idx: str):
@@ -173,7 +314,7 @@ class Component:
             json["pins"] = serialize(self.pins)
             json["io-pins"] = self.io_pins
             json["subcomponents"] = serialize(self.chips)
-            json["wires"] = self.wires
+            json["wires"] = serialize(self.wires)
             wfile.write(dumps(json, indent=4))
 
 

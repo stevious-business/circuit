@@ -1,28 +1,195 @@
 {
-    "component-meta": {},
-    "pins": {},
-    "io-pins": {},
+    "component-meta": {
+        "data-version": 1,
+        "width": -1,
+        "height": -1,
+        "backgroud-color": "#000000",
+        "box-label": ""
+    },
+    "pins": {
+        "0": {
+            "wire": 0,
+            "x": 0,
+            "y": 35,
+            "label": "X"
+        },
+        "1": {
+            "wire": 0,
+            "x": 8,
+            "y": 35
+        },
+        "2": {
+            "wire": 0,
+            "x": 8,
+            "y": 25
+        },
+        "3": {
+            "wire": 0,
+            "x": 8,
+            "y": 45
+        },
+        "4": {
+            "wire": 1,
+            "x": 20,
+            "y": 35
+        },
+        "5": {
+            "wire": 1,
+            "x": 35,
+            "y": 35,
+            "label": "!X"
+        }
+    },
+    "io-pins": {
+        "0": 0,
+        "1": 5
+    },
     "subcomponents": {
         "0": {
             "type": "lcst._builtins.vcc",
-            "x": "15",
-            "y": "0"
+            "x": 15,
+            "y": 0
         },
         "1": {
             "type": "lcst._builtins.pmos_fet",
-            "x": "10",
-            "y": "20"
+            "x": 10,
+            "y": 20
         },
         "2": {
             "type": "lcst._builtins.nmos_fet",
-            "x": "10",
-            "y": "40"
+            "x": 10,
+            "y": 40
         },
         "3": {
             "type": "lcst._builtins.gnd",
-            "x": "15",
-            "y": "60"
+            "x": 15,
+            "y": 60
         }
     },
-    "wires": {}
+    "wires": {
+        "0": {
+            "connections": [
+                {
+                    "from": {
+                        "type": "pin",
+                        "id": 0
+                    },
+                    "to": {
+                        "type": "pin",
+                        "id": 1
+                    }
+                },
+                {
+                    "from": {
+                        "type": "pin",
+                        "id": 1
+                    },
+                    "to": {
+                        "type": "pin",
+                        "id": 2
+                    }
+                },
+                {
+                    "from": {
+                        "type": "pin",
+                        "id": 1
+                    },
+                    "to": {
+                        "type": "pin",
+                        "id": 3
+                    }
+                },
+                {
+                    "from": {
+                        "type": "pin",
+                        "id": 2
+                    },
+                    "to": {
+                        "type": "chip",
+                        "cid": 1,
+                        "iid": 1
+                    }
+                },
+                {
+                    "from": {
+                        "type": "pin",
+                        "id": 3
+                    },
+                    "to": {
+                        "type": "chip",
+                        "cid": 2,
+                        "iid": 1
+                    }
+                }
+            ]
+        },
+        "1": {
+            "connections": [
+                {
+                    "from": {
+                        "type": "pin",
+                        "id": 4
+                    },
+                    "to": {
+                        "type": "pin",
+                        "id": 5
+                    }
+                },
+                {
+                    "from": {
+                        "type": "pin",
+                        "id": 4
+                    },
+                    "to": {
+                        "type": "chip",
+                        "cid": 1,
+                        "iid": 2
+                    }
+                },
+                {
+                    "from": {
+                        "type": "pin",
+                        "id": 4
+                    },
+                    "to": {
+                        "type": "chip",
+                        "cid": 2,
+                        "iid": 0
+                    }
+                }
+            ]
+        },
+        "2": {
+            "connections": [
+                {
+                    "from": {
+                        "type": "chip",
+                        "cid": 0,
+                        "iid": 0
+                    },
+                    "to": {
+                        "type": "chip",
+                        "cid": 1,
+                        "iid": 0
+                    }
+                }
+            ]
+        },
+        "3": {
+            "connections": [
+                {
+                    "from": {
+                        "type": "chip",
+                        "cid": 2,
+                        "iid": 2
+                    },
+                    "to": {
+                        "type": "chip",
+                        "cid": 3,
+                        "iid": 0
+                    }
+                }
+            ]
+        }
+    }
 }

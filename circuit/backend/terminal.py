@@ -143,22 +143,49 @@ class CCP:
         sc.add_chip(c, x, y)
 
     def pin_place(self, x, y, *args):
-        return
+        scn = self.threadCommunicator.selectedComponent
+        sc: Component = self.threadCommunicator.openProject.getComponent(
+            scn, self.threadCommunicator.package_datas
+        )
+        sc.new_pin(x, y)
 
     def pin_label(self, id_, label, *args):
-        return
+        scn = self.threadCommunicator.selectedComponent
+        sc: Component = self.threadCommunicator.openProject.getComponent(
+            scn, self.threadCommunicator.package_datas
+        )
+        sc.get_pin(id_).label(label)
 
     def pin_io(self, *args):
         self.help("pin", "io")
 
     def pin_io_set(self, id_, *args):
-        return
+        scn = self.threadCommunicator.selectedComponent
+        sc: Component = self.threadCommunicator.openProject.getComponent(
+            scn, self.threadCommunicator.package_datas
+        )
+        sc.mark_pin_as_io(id_)
+
+    def pin_io_unset(self, id_, *args):
+        scn = self.threadCommunicator.selectedComponent
+        sc: Component = self.threadCommunicator.openProject.getComponent(
+            scn, self.threadCommunicator.package_datas
+        )
+        sc.mark_pin_as_io(id_, False)
 
     def wire_new(self, from_, to, *args):
-        return
+        scn = self.threadCommunicator.selectedComponent
+        sc: Component = self.threadCommunicator.openProject.getComponent(
+            scn, self.threadCommunicator.package_datas
+        )
+        sc.new_wire(from_, to)
 
-    def wire_connect(self, from_, to, *args):
-        return
+    def wire_connect(self, idx, from_, to, *args):
+        scn = self.threadCommunicator.selectedComponent
+        sc: Component = self.threadCommunicator.openProject.getComponent(
+            scn, self.threadCommunicator.package_datas
+        )
+        sc.wire_connect(idx, from_, to)
 
 
     def debug(self, lvl: str):
