@@ -21,7 +21,8 @@ if __name__ == "__main__":
         loaded_package_count = 0
         for package in package_list:
             try:
-                package_datas[package] = package_manager.load_package(package)
+                pack_module = package_manager.load_package(package)
+                package_datas[pack_module.PACKAGE.uid()] = pack_module
                 loaded_package_count += 1
             except package_manager.InvalidPackageError as e:
                 log(LOG_WARN, f"Package {package} failed to load! ({e})")

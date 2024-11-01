@@ -38,7 +38,8 @@ def validate_package(pack) -> int:
                 log(LOG_WARN, f"Component does not inherit from PluginComponent: {component_class}")
                 ERR_CODE |= F_COMPTYPE
             log(LOG_VERB, "Done!")
-    except:
+    except Exception as e:
+        log(LOG_WARN, f"Encountered {e} while loading package...")
         ERR_CODE |= F_INVALID
     finally:
         return ERR_CODE

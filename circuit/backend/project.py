@@ -6,7 +6,7 @@ import re
 from .dag import DAG
 from circuitlogger import *
 from configuration import INCLUDED_PACKAGES
-from circuit.base_classes import Component, Chip
+from circuit.base_classes import Component, PluginComponent
 
 
 class ProjectLoaderError(RuntimeError): pass
@@ -93,8 +93,8 @@ class Project:
             package_data = package_datas[packname]
             for chipname in project_dependencies[packname]:
                 try:
-                    component_data = package_data.PACKAGE[chipname]
-                    self.included_components[package_data.PACKAGE.mangled_name(chipname)] = component_data
+                    component_class = package_data.PACKAGE[chipname]
+                    self.included_components[package_data.PACKAGE.mangled_name(chipname)] = component_class
                 except KeyError:
                     log(LOG_FAIL, f"Chip {package_data.PACKAGE.mangled_name(chipname)} could not be found!")
                     raise ProjectLoaderError("Error obtaining component")
@@ -165,8 +165,17 @@ class Project:
     def getComponentWrapper(self, id_) -> ComponentWrapper:
         return self.config["components"][id_]
 
-    def getComponent(self, id_) -> Component:
-        return self.getComponentWrapper(id_).component
+    def getComponent(self, id_) -> Component | PluginComponent:
+        if self.componentExists(id_):
+            return self.getComponentWrapper(id_).component
+        if self.pluginComponentExists(id_):
+            pcClass = self.included_components[id_]
+            component: PluginComponent = pcClass()
+        raise KeyError(f"Component {id_} does not exist!")
 
     def componentExists(self, id_) -> bool:
+        """Check whether `id_` is a project component"""
         return id_ in self.config["components"].keys()
+
+    def pluginComponentExists(self, id_) -> bool:
+        return id_ in self.included_components.keys()

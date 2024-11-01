@@ -2,7 +2,7 @@ from locals import *
 from circuitlogger import *
 from thread_communicator import ServerData, Directive, DirectiveType
 from .project import Project
-from circuit.base_classes import Package
+from circuit.base_classes import Package, Component
 
 from json import loads, JSONDecodeError
 
@@ -116,7 +116,7 @@ class CCP:
                 raise InvalidCommandException(f"Chip {chip} does not exist within {pack}")
             mangled_cname = package.mangled_name(chip)
             chip_class = package[mangled_cname]
-            self.threadCommunicator.openProject.included_components[mangled_cname] = chip_class
+            self.threadCommunicator.openProject.included_components[mangled_cname] = chip_class # TODO: move to project method
             already_included_chips.append(chip)
         self.threadCommunicator.openProject.config["required-packages"][pack] = already_included_chips
 
@@ -133,7 +133,10 @@ class CCP:
             raise KeyError(f"Component {name} does not exist!")
 
     def chip_place(self, cname, x, y, *args):
-        return
+        scn = self.threadCommunicator.selectedComponent
+        sc: Component = self.threadCommunicator.openProject.getComponent(scn)
+        c: Component = self.threadCommunicator.openProject.getComponent(cname)
+        sc.add_chip(c, x, y)
 
     def pin_place(self, x, y, *args):
         return

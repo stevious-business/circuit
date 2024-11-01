@@ -11,7 +11,7 @@
         "id": "not"
     },
     "required-packages": {
-        "packages._builtins": [
+        "lcst._builtins": [
             "nmos_fet",
             "pmos_fet",
             "vcc",

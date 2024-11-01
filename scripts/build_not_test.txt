@@ -1,14 +1,14 @@
 project new notgate_test
 project meta set description Test of scripting + framework
-project include packages._builtins vcc gnd pmos_fet nmos_fet
+project include lcst._builtins vcc gnd pmos_fet nmos_fet
 component add not
 component select not
 project setroot not
 
-chip place packages._builtins.vcc 15 0
-chip place packages._builtins.pmos_fet 10 20
-chip place packages._builtins.nmos_fet 10 40
-chip place packages._builtins.gnd 15 60
+chip place lcst._builtins.vcc 15 0
+chip place lcst._builtins.pmos_fet 10 20
+chip place lcst._builtins.nmos_fet 10 40
+chip place lcst._builtins.gnd 15 60
 
 pin place 0 35
 pin label 0 X

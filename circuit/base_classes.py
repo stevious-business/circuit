@@ -1,5 +1,5 @@
 from json import loads, JSONDecodeError, dumps
-from os.path import basename
+from os.path import basename, join
 
 from .backend.dag import DAG
 from circuitlogger import log
@@ -177,8 +177,12 @@ class PluginComponent(Component):
     _component_name = "Basic Component"
     _component_file_path = "dummy.json"
 
-    def __init__(self):
-        self._load_from_component_file(self._component_file_path)
+    def __init__(self, package_path):
+        self._load_from_component_file(join(
+            package_path,
+            "components",
+            self._component_file_path
+        ))
 
     def _load_from_component_file(self, path):
         # TODO: Proper asset handling / data version checking etc.
@@ -195,7 +199,7 @@ class PluginComponent(Component):
 class Package:
     # TODO: Move params to configuration file
     def __init__(self, id: str, name: str, included_components: dict[str: type],
-                 publisher="lcst", base_path="packages"):
+                 publisher="lcst"):
         self.id = id
         self.name = name
         self.publisher = publisher
@@ -205,9 +209,9 @@ class Package:
         for c_name in included_components:
             mangled_name = ".".join([publisher, id, c_name])
             self.included_components[mangled_name] = included_components[c_name]
-        self.base_path = base_path
-        self.components_path = base_path + "/components"
-        self.component_scripts_path = base_path + "/component_scripts"
+
+    def uid(self):
+        return ".".join([self.publisher, self.id])
 
     def mangled_name(self, c_name):
         return ".".join([self.publisher, self.id, c_name])
