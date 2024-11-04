@@ -67,6 +67,21 @@ class Pin:
         return d
 
 
+class WireDataHandler:
+    def __init__(self):
+        self.dataFormat = {}
+
+    def add_package(self, pack):
+        self.dataFormat[pack.uid()] = pack.get_data_format()
+
+    @staticmethod
+    def from_packdatas(packdatas):
+        wdh = WireDataHandler()
+        for packname in packdatas:
+            pack: Package = packdatas[packname].PACKAGE
+            wdh.add_package(pack)
+
+
 class Wire:
 
     class AlreadyConnectedError(ValueError): pass
@@ -347,7 +362,8 @@ class PluginComponent(Component):
 
 class Package:
     # TODO: Move params to configuration file
-    def __init__(self, id: str, name: str, included_components: dict[str: type],
+    def __init__(self, id: str, name: str,
+                 included_components: dict[str: type], data_fmt=[],
                  publisher="lcst"):
         self.id = id
         self.name = name
@@ -358,6 +374,7 @@ class Package:
         for c_name in included_components:
             mangled_name = ".".join([publisher, id, c_name])
             self.included_components[mangled_name] = included_components[c_name]
+        self.data_format = data_fmt
 
     def has_component(self, id_):
         return id_ in self.included_components.keys()
@@ -385,3 +402,6 @@ class Package:
         elif self.mangled_name(item) in self.included_components.keys():
             return self.included_components[self.mangled_name(item)]
         raise KeyError(item)
+
+    def get_data_format(self):
+        return self.data_format

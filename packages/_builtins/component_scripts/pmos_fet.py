@@ -1,4 +1,4 @@
-from circuit.base_classes import PluginComponent
+from quickrefs import *
 
 
 class PMOS_FET(PluginComponent):

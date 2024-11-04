@@ -69,7 +69,7 @@ class Project:
             self.metadata[attrname] = " ".join(values)
 
     def load_from_config(self, data, package_datas):
-        self.config = data
+        self.config = data.copy()
         if self.config == {}:
             log(LOG_FAIL, f"Received empty project config!")
             raise ValueError("No configuration data")

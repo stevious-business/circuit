@@ -232,7 +232,7 @@ class CCP:
                 log(LOG_FAIL, f"There was an error ({repr(e)}) executing the command.")
                 if help_on_fail:
                     self.print_valid_commands()
-                raise e
+                #raise e
         else:
             log(LOG_FAIL, f"Invalid command '{operation}'!")
             if help_on_fail:
